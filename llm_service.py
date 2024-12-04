@@ -58,6 +58,7 @@ def generate_response(query: str) -> str:
     """Genera una respuesta usando el modelo"""
     formatted_context = format_context()
     prompt = f"""
+    Basado en la siguiente información:
     {formatted_context}
     
     Pregunta del usuario: {query}
@@ -71,7 +72,7 @@ def generate_response(query: str) -> str:
     try:
         response = generator(
             prompt,
-            max_length=500,
+            max_new_tokens=100,
             num_return_sequences=1,
             temperature=0.7,
             top_p=0.95,

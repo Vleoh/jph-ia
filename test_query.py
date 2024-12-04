@@ -5,7 +5,7 @@ try:
     response = requests.post(
         "http://localhost:5000/query",
         json={
-            "text": "Switch Ethernet de cuantos puertos tenemos stock",
+            "text": "que es jph lions",
             "user_id": "test_user"
         },
         timeout=10
