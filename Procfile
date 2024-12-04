@@ -1,1 +1,1 @@
-     web: uvicorn llm_service:app --host=0.0.0.0 --port=${PORT:-5000}
+   web: gunicorn llm_service:app --host=0.0.0.0 --port=${PORT:-5000}
