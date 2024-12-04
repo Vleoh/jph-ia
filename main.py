@@ -1,5 +1,6 @@
 #main.py
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 import httpx
@@ -11,6 +12,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Sistema de Consultas NLP")
+
+# Configuración de CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Permitir solicitudes desde tu frontend local
+    allow_credentials=True,
+    allow_methods=["*"],  # Permitir todos los métodos (GET, POST, etc.)
+    allow_headers=["*"],  # Permitir todos los encabezados
+)
 
 class Query(BaseModel):
     text: str
@@ -66,22 +76,31 @@ async def process_query(query: Query):
             }
         )
         
+        # return {
+        #     "success": True,
+        #     "response": llm_response.data if llm_response.success else {},
+        #     "metadata": {
+        #         "query_type": query_type,
+        #         "processing_details": semantic_result.data.get("details", {})
+        #     }
+        # }
         return {
-            "success": True,
-            "response": llm_response.data if llm_response.success else {},
-            "metadata": {
-                "query_type": query_type,
-                "processing_details": semantic_result.data.get("details", {})
-            }
-        }
-        
+    "success": True,
+    "response": semantic_result.data,  # Enviar directamente los datos del análisis
+    "metadata": {
+        "query_type": query_type,
+        "processing_details": semantic_result.data.get("details", {})
+    }
+}
+
     except Exception as e:
         logger.error(f"Error procesando consulta: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    uvicorn.run(app, host="localhost", port=5000)  # Cambiado a localhost

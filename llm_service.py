@@ -103,13 +103,20 @@ async def generate_text(request: GenerationRequest):
     try:
         response = generate_response(request.original_query)
         
-        return GenerationResponse(
+        # Crear la respuesta final
+        result = GenerationResponse(
             response=response,
             metadata={
                 "model": "TinyLlama-1.1B-Chat",
                 "context_length": len(format_context())
             }
         )
+        
+        # Log de la respuesta final
+        # logger.info(f"Respuesta enviada al frontend: {result.json()}")
+        logger.info(f"Respuesta enviada al frontend: {result.model_dump_json()}")
+        
+        return result
         
     except Exception as e:
         logger.error(f"Error en servicio de generación: {str(e)}")
