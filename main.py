@@ -31,13 +31,36 @@ class ServiceResponse(BaseModel):
     data: Dict[Any, Any]
     error: Optional[str] = None
 
+# async def call_service(service_url: str, payload: dict) -> ServiceResponse:
+#     async with httpx.AsyncClient() as client:
+#         try:
+#             response = await client.post(service_url, json=payload)
+#             return ServiceResponse(
+#                 success=True,
+#                 data=response.json()
+#             )
+#         except Exception as e:
+#             logger.error(f"Error llamando al servicio {service_url}: {str(e)}")
+#             return ServiceResponse(
+#                 success=False,
+#                 error=str(e),
+#                 data={}
+#             )
 async def call_service(service_url: str, payload: dict) -> ServiceResponse:
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(service_url, json=payload)
+            response.raise_for_status()  # Lanza una excepción si el código HTTP no es 2xx
             return ServiceResponse(
                 success=True,
                 data=response.json()
+            )
+        except httpx.HTTPStatusError as http_error:
+            logger.error(f"HTTP Error: {http_error.response.status_code} - {http_error.response.text}")
+            return ServiceResponse(
+                success=False,
+                error=f"HTTP {http_error.response.status_code}: {http_error.response.text}",
+                data={}
             )
         except Exception as e:
             logger.error(f"Error llamando al servicio {service_url}: {str(e)}")
@@ -46,6 +69,7 @@ async def call_service(service_url: str, payload: dict) -> ServiceResponse:
                 error=str(e),
                 data={}
             )
+
 
 @app.post("/query")
 async def process_query(query: Query):

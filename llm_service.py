@@ -122,6 +122,58 @@ async def generate_text(request: GenerationRequest):
         logger.error(f"Error en servicio de generación: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# -------------------------------
+# @app.post("/generate", response_model=GenerationResponse)
+# async def generate_text(request: GenerationRequest):
+    logger.info(f"Recibida solicitud de generación: {request.original_query}")
+    try:
+        # Paso 1: Analizar la consulta del usuario
+        analysis = mock_analysis(request.original_query)
+        logger.info(f"Resultado del análisis: {analysis}")
+
+        # Paso 2: Enriquecer el prompt con la información analizada
+        formatted_context = format_context()
+        prompt = f"""
+        Basado en la siguiente información:
+        {formatted_context}
+        
+        Análisis previo: Tipo de consulta: {', '.join(analysis.query_type)}, Entidades detectadas: {analysis.entities}
+        
+        Pregunta del usuario: {request.original_query}
+        
+        Por favor, proporciona una respuesta concisa y relevante basada en la información anterior.
+        
+        Respuesta:"""
+
+        logger.info(f"Prompt enviado al modelo: {prompt}")
+        
+        # Paso 3: Generar respuesta usando el modelo
+        response = generator(
+            prompt,
+            max_new_tokens=100,
+            num_return_sequences=1,
+            temperature=0.7,
+            top_p=0.95,
+        )
+        generated_text = response[0]['generated_text'].split("Respuesta:")[-1].strip()
+        logger.info(f"Respuesta generada: {generated_text}")
+        
+        # Paso 4: Devolver la respuesta al frontend
+        result = GenerationResponse(
+            response=generated_text,
+            metadata={
+                "model": "TinyLlama-1.1B-Chat",
+                "context_length": len(formatted_context),
+                "analysis": analysis.details
+            }
+        )
+        logger.info(f"Respuesta enviada al frontend: {result.model_dump_json()}")
+        return result
+
+    except Exception as e:
+        logger.error(f"Error en servicio de generación: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5004)

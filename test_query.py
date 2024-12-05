@@ -5,7 +5,7 @@ try:
     response = requests.post(
         "http://localhost:5000/query",
         json={
-            "text": "que es jph lions",
+            "text": "jph vende mochilas?",
             "user_id": "test_user"
         },
         timeout=10
