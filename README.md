@@ -15,10 +15,8 @@ Antes de comenzar, asegúrate de tener instalado lo siguiente:
 Para clonar este repositorio, abre una terminal y ejecuta el siguiente comando:
 
 bash
-git clone https://github.com/tu_usuario/tu_repositorio.git
+git clone https://github.com/Vleoh/jph-ia.git
 
-
-Reemplaza `tu_usuario` y `tu_repositorio` con tu nombre de usuario de GitHub y el nombre del repositorio.
 
 ## Instalación de Dependencias
 
